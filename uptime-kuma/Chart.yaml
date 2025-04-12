@@ -1,0 +1,7 @@
+apiVersion: v2
+name: uptime-kuma
+description: A Helm chart for deploying Uptime Kuma in Kubernetes
+type: application
+version: 0.1.0
+appVersion: "1.23.11"  # or latest
+icon: https://raw.githubusercontent.com/louislam/uptime-kuma/master/src/assets/logo.png
