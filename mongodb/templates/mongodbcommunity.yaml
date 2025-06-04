@@ -22,3 +22,13 @@ spec:
       scramCredentialsSecretName: {{ .Values.mongodb.user.scramSecret }}
   additionalMongodConfig:
     {{- toYaml .Values.mongodb.additionalMongodConfig | nindent 4 }}
+  statefulSet:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: mongod
+              ports:
+                - containerPort: 27017
+                  name: mongo
+                  protocol: TCP
