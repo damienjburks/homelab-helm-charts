@@ -6,7 +6,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app.kubernetes.io/name: {{ .Release.Name }}
+    app: {{ .Release.Name }}-svc
   ports:
     - name: {{ .Release.Name }}
       port: {{ .Values.service.port }}
