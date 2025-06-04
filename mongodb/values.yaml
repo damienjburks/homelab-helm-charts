@@ -27,7 +27,7 @@ service:
 ingress:
   className: nginx
   enabled: true
-  host: status.dsb-hub.local
+  host: mongodb.dsb-hub.local
   annotations:
     cert-manager.io/cluster-issuer: mkcert-issuer
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -35,5 +35,5 @@ ingress:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
   tls:
     enabled: true
-    host: status.dsb-hub.local  
-    secretName: uptimekuma-cert-tls
+    host: mongodb.dsb-hub.local  
+    secretName: mongodb-cert-tls
