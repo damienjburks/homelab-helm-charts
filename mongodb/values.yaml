@@ -10,9 +10,9 @@ mongodb:
     scramSecret: mongodb-scram-secret
   roles:
     - name: clusterAdmin
-      db: admin
+      db: damien
     - name: userAdmin
-      db: admin
+      db: damien
   additionalMongodConfig:
     storage:
       wiredTiger:
