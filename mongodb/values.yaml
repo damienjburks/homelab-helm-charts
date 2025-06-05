@@ -18,8 +18,3 @@ mongodb:
       wiredTiger:
         engineConfig:
           journalCompressor: zlib
-
-service:
-  port: 27017
-  targetPort: 27017
-  nodePort: 30017
