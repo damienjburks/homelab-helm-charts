@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: ghcr.io/damienjburks/trading-bot
+  repository: yukisan1225/trading-bot
   tag: latest
   pullPolicy: Always
 
