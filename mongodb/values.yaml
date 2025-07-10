@@ -1,0 +1,20 @@
+mongodb:
+  name: mongodb
+  version: "6.0.5"
+  members: 2
+  user:
+    name: damien
+    db: admin
+    password: "itainteasy"
+    passwordSecret: notthesame
+    scramSecret: mongodb-scram-secret
+  roles:
+    - name: clusterAdmin
+      db: damien
+    - name: userAdmin
+      db: damien
+  additionalMongodConfig:
+    storage:
+      wiredTiger:
+        engineConfig:
+          journalCompressor: zlib
