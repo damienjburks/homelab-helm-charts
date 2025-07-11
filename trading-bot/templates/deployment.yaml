@@ -14,7 +14,7 @@ spec:
       labels:
         app: trading-bot
       annotations:
-         vault.hashicorp.com/agent-inject: "false"
+         vault.hashicorp.com/agent-inject: "true"
          vault.hashicorp.com/role: "trading-bot"
         
         # Alpaca Trading Bot Credentials
