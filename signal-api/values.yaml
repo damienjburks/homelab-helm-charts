@@ -23,12 +23,12 @@ service:
   type: ClusterIP
   port: 8080
 
-# persistence:
-#   enabled: true
-#   existingClaim: ""
-#   storageClass: ""
-#   accessMode: ReadWriteOnce
-#   size: 1Gi
+persistence:
+  enabled: false
+  existingClaim: ""
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
 
 env:
   MODE: native
