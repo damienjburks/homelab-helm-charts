@@ -5,14 +5,10 @@ image:
   tag: latest
   pullPolicy: IfNotPresent
 
-service:
-  type: ClusterIP
-  port: 8080
-
 ingress:
   className: nginx
   enabled: true
-  host: signalapi.dsb-hub.local
+  host: signal.dsb-hub.local
   annotations:
     cert-manager.io/cluster-issuer: mkcert-issuer
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -20,8 +16,12 @@ ingress:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
   tls:
     enabled: true
-    host: signalapi.dsb-hub.local  
-    secretName: signalapi-cert-tls
+    host: signal.dsb-hub.local  
+    secretName: signal-cert-tls
+
+service:
+  type: ClusterIP
+  port: 8080
 
 persistence:
   enabled: true

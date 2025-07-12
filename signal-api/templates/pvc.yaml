@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ include ".Chart.Name" . }}-pvc
+  name: {{ include "signal-api.fullname" . }}-pvc
 spec:
   accessModes:
     - {{ .Values.persistence.accessMode }}
