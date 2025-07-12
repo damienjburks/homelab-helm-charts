@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "signal-api.name" . }}
+  name: {{ include "signal-api.name" . }}-service
 spec:
   type: {{ .Values.service.type }}
   ports:
