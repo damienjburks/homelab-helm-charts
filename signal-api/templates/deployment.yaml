@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "signal-api.name" . }}
+  name: {{ include ".Release.Name"  . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "signal-api.name" . }}
+      app: {{ include ".Release.Name"  . }}
   template:
     metadata:
       labels:
-        app: {{ include "signal-api.name" . }}
+        app: {{ include ".Release.Name"  . }}
     spec:
       affinity:
         nodeAffinity:

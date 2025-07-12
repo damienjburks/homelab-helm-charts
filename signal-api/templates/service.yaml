@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "signal-api.name" . }}
+  name: {{ include ".Release.Name"  . }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -9,4 +9,4 @@ spec:
       port: {{ .Values.service.port }}
       targetPort: 8080
   selector:
-    app: {{ include "signal-api.name" . }}
+    app: {{ include ".Release.Name"  . }}
