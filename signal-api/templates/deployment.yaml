@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include ".Release.Name" . }}
+  name: {{ include ".Chart.Name" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include ".Release.Name" . }}
+      app: {{ include ".Chart.Name" . }}
   template:
     metadata:
       labels:
-        app: {{ include ".Release.Name" . }}
+        app: {{ include ".Chart.Name" . }}
     spec:
       affinity:
         nodeAffinity:
