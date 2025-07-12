@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}
   labels:
-    app: trading-bot
+    app: paper-trading-bot
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: trading-bot
+      app: paper-trading-bot
   template:
     metadata:
       labels:
-        app: trading-bot
+        app: paper-trading-bot
       annotations:
          vault.hashicorp.com/agent-inject: "true"
          vault.hashicorp.com/role: "trading-bot"
@@ -30,7 +30,7 @@ spec:
       serviceAccountName: trading-bot
       automountServiceAccountToken: true
       containers:
-        - name: trading-bot
+        - name: paper-trading-bot
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
