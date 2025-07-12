@@ -1,0 +1,20 @@
+replicaCount: 1
+
+image:
+  repository: bbernhard/signal-cli-rest-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+persistence:
+  enabled: true
+  existingClaim: ""
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+env:
+  MODE: native
