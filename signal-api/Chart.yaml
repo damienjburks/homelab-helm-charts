@@ -1,6 +1,8 @@
 apiVersion: v2
 name: signal-api
-description: A Helm chart for bbernhard/signal-cli-rest-api
+description: >
+  A Helm chart for bbernhard/signal-cli-rest-api. For more information about this API,
+  you should reference this URL: https://github.com/bbernhard/signal-cli-rest-api/tree/master
 type: application
 version: 0.1.0
 appVersion: "latest"
