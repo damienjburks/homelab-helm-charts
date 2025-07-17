@@ -25,6 +25,3 @@ ingress:
     secretName: paper-trader-cert-tls
 
 resources: {}
-
-nodeSelector:
-  kubernetes.io/arch: arm64
