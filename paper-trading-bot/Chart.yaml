@@ -1,5 +1,5 @@
 apiVersion: v2
-name: trading-bot
+name: paper-trading-bot
 description: A Helm chart for deploying the trading-bot application
 type: application
 version: 0.1.0

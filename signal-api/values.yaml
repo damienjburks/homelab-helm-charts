@@ -1,0 +1,34 @@
+replicaCount: 1
+
+image:
+  repository: bbernhard/signal-cli-rest-api
+  tag: latest
+  pullPolicy: IfNotPresent
+
+ingress:
+  className: nginx
+  enabled: true
+  host: signal.dsb-hub.local
+  annotations:
+    cert-manager.io/cluster-issuer: mkcert-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  tls:
+    enabled: true
+    host: signal.dsb-hub.local  
+    secretName: signal-cert-tls
+
+service:
+  type: ClusterIP
+  port: 8080
+
+persistence:
+  enabled: false
+  existingClaim: ""
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+env:
+  MODE: native
