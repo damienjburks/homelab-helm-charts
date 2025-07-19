@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}
   labels:
-    app: 
+    app: quanthelm-5k
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: 
+      app: quanthelm-5k
   template:
     metadata:
       labels:
-        app: 
+        app: quanthelm-5k
       annotations:
          vault.hashicorp.com/agent-inject: "true"
          vault.hashicorp.com/role: "trading-bot"
