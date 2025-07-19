@@ -18,9 +18,9 @@ spec:
          vault.hashicorp.com/role: "trading-bot"
         
          # Alpaca Trading Bot Credentials
-         vault.hashicorp.com/agent-inject-secret-alpaca-credentials: "kv/data/secret/trading-bot/alpaca-paper-credentials"
+         vault.hashicorp.com/agent-inject-secret-alpaca-credentials: "kv/data/secret/trading-bot/quanthelm-100k/alpaca-paper-credentials"
          vault.hashicorp.com/agent-inject-template-alpaca-credentials: |
-           {{`{{- with secret "kv/data/secret/trading-bot/alpaca-paper-credentials" -}}`}}
+           {{`{{- with secret "kv/data/secret/trading-bot/quanthelm-100k/alpaca-paper-credentials" -}}`}}
            KEY={{`{{ .Data.data.key }}`}}
            SECRET={{`{{ .Data.data.secret }}`}}
            {{`{{- end }}`}}
