@@ -52,6 +52,8 @@ spec:
           env:
             - name: BASH_ENV
               value: /vault/secrets/config
+            - name: RUN_SWING_TRADE_SCORER
+              value: "true"
 {{- if .Values.nodeSelector }}
     nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
