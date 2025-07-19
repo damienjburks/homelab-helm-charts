@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}-service
   labels:
-    app: paper-trading-bot
+    app: quanthelm-100k
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -11,4 +11,4 @@ spec:
     port: {{ .Values.service.port }}
     targetPort: {{ .Values.service.targetPort }}
   selector:
-    app: paper-trading-bot
+    app: quanthelm-100k

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: quanthelm-100k
+description: A Helm chart for deploying the quanthelm alpaca trading-bot application with a starting fund of $100,000. This is a paper trading environment.
+type: application
+version: 0.1.0
+appVersion: 1.0.0

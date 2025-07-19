@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: 
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: 
+  template:
+    metadata:
+      labels:
+        app: 
+      annotations:
+         vault.hashicorp.com/agent-inject: "true"
+         vault.hashicorp.com/role: "trading-bot"
+        
+         # Alpaca Trading Bot Credentials
+         vault.hashicorp.com/agent-inject-secret-alpaca-credentials: "kv/data/secret/trading-bot/alpaca-paper-credentials"
+         vault.hashicorp.com/agent-inject-template-alpaca-credentials: |
+           {{`{{- with secret "kv/data/secret/trading-bot/alpaca-paper-credentials" -}}`}}
+           KEY={{`{{ .Data.data.key }}`}}
+           SECRET={{`{{ .Data.data.secret }}`}}
+           {{`{{- end }}`}}
+
+         # OpenAI Credentials
+         vault.hashicorp.com/agent-inject-secret-openai-credentials: "kv/data/secret/trading-bot/openai-token"
+         vault.hashicorp.com/agent-inject-template-openai-credentials: |
+            {{`{{- with secret "kv/data/secret/trading-bot/openai-token" -}}`}}
+            TOKEN={{`{{ .Data.data.token }}`}}
+            {{`{{- end }}`}}
+
+         # Mailgun Credentials
+         vault.hashicorp.com/agent-inject-secret-mailgun-credentials: "kv/data/secret/trading-bot/mailgun-token"
+         vault.hashicorp.com/agent-inject-template-mailgun-credentials: |
+            {{`{{- with secret "kv/data/secret/trading-bot/mailgun-token" -}}`}}
+            TOKEN={{`{{ .Data.data.token }}`}}
+            {{`{{- end }}`}}
+
+         restartedAt: "{{ now | date "2006-01-02T15:04:05Z07:00" }}"
+    spec:
+      serviceAccountName: trading-bot
+      automountServiceAccountToken: true
+      containers:
+        - name: 
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+          env:
+            - name: BASH_ENV
+              value: /vault/secrets/config
+{{- if .Values.nodeSelector }}
+    nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}

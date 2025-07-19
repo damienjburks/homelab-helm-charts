@@ -3,16 +3,16 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}
   labels:
-    app: paper-trading-bot
+    app: quanthelm-100k
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: paper-trading-bot
+      app: quanthelm-100k
   template:
     metadata:
       labels:
-        app: paper-trading-bot
+        app: quanthelm-100k
       annotations:
          vault.hashicorp.com/agent-inject: "true"
          vault.hashicorp.com/role: "trading-bot"
@@ -44,7 +44,7 @@ spec:
       serviceAccountName: trading-bot
       automountServiceAccountToken: true
       containers:
-        - name: paper-trading-bot
+        - name: quanthelm-100k
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
