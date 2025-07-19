@@ -44,7 +44,7 @@ spec:
       serviceAccountName: trading-bot
       automountServiceAccountToken: true
       containers:
-        - name: 
+        - name: quanthelm-5k
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
