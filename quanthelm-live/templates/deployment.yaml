@@ -54,6 +54,8 @@ spec:
               value: /vault/secrets/config
             - name: RUN_SWING_TRADE_SCORER
               value: "true"
+            - name: IS_PAPER
+              value: "false"
 {{- if .Values.nodeSelector }}
     nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
