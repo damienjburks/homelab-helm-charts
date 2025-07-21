@@ -3,24 +3,24 @@ kind: Deployment
 metadata:
   name: {{ .Release.Name }}
   labels:
-    app: quanthelm-100k
+    app: quanthelm-live
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: quanthelm-100k
+      app: quanthelm-live
   template:
     metadata:
       labels:
-        app: quanthelm-100k
+        app: quanthelm-live
       annotations:
          vault.hashicorp.com/agent-inject: "true"
          vault.hashicorp.com/role: "trading-bot"
         
          # Alpaca Trading Bot Credentials
-         vault.hashicorp.com/agent-inject-secret-alpaca-credentials: "kv/data/secret/trading-bot/quanthelm-100k/alpaca-paper-credentials"
+         vault.hashicorp.com/agent-inject-secret-alpaca-credentials: "kv/data/secret/trading-bot/quanthelm-live/alpaca-paper-credentials"
          vault.hashicorp.com/agent-inject-template-alpaca-credentials: |
-           {{`{{- with secret "kv/data/secret/trading-bot/quanthelm-100k/alpaca-paper-credentials" -}}`}}
+           {{`{{- with secret "kv/data/secret/trading-bot/quanthelm-live/alpaca-paper-credentials" -}}`}}
            KEY={{`{{ .Data.data.key }}`}}
            SECRET={{`{{ .Data.data.secret }}`}}
            {{`{{- end }}`}}
@@ -44,7 +44,7 @@ spec:
       serviceAccountName: trading-bot
       automountServiceAccountToken: true
       containers:
-        - name: quanthelm-100k
+        - name: quanthelm-live
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -53,7 +53,7 @@ spec:
             - name: BASH_ENV
               value: /vault/secrets/config
             - name: RUN_SWING_TRADE_SCORER
-              value: "false"
+              value: "true"
 {{- if .Values.nodeSelector }}
     nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
