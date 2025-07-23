@@ -39,6 +39,13 @@ spec:
             TOKEN={{`{{ .Data.data.token }}`}}
             {{`{{- end }}`}}
 
+          # Redis credentials
+         vault.hashicorp.com/agent-inject-secret-redis-password: "kv/data/secret/redis"
+         vault.hashicorp.com/agent-inject-template-redis-password: |
+           {{`{{- with secret "kv/data/secret/redis" -}}`}}
+           {{`{{ .Data.data.password }}`}}
+           {{`{{- end }}`}}
+
          restartedAt: "{{ now | date "2006-01-02T15:04:05Z07:00" }}"
     spec:
       serviceAccountName: trading-bot
