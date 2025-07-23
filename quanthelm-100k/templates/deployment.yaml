@@ -14,32 +14,39 @@ spec:
       labels:
         app: quanthelm-100k
       annotations:
-         vault.hashicorp.com/agent-inject: "true"
-         vault.hashicorp.com/role: "trading-bot"
-        
-         # Alpaca Trading Bot Credentials
-         vault.hashicorp.com/agent-inject-secret-alpaca-credentials: "kv/data/secret/trading-bot/quanthelm-100k/alpaca-paper-credentials"
-         vault.hashicorp.com/agent-inject-template-alpaca-credentials: |
-           {{`{{- with secret "kv/data/secret/trading-bot/quanthelm-100k/alpaca-paper-credentials" -}}`}}
-           KEY={{`{{ .Data.data.key }}`}}
-           SECRET={{`{{ .Data.data.secret }}`}}
-           {{`{{- end }}`}}
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "trading-bot"
+               
+        # Alpaca Trading Bot Credentials
+        vault.hashicorp.com/agent-inject-secret-alpaca-credentials: "kv/data/secret/trading-bot/quanthelm-100k/alpaca-paper-credentials"
+        vault.hashicorp.com/agent-inject-template-alpaca-credentials: |
+          {{`{{- with secret "kv/data/secret/trading-bot/quanthelm-100k/alpaca-paper-credentials" -}}`}}
+          KEY={{`{{ .Data.data.key }}`}}
+          SECRET={{`{{ .Data.data.secret }}`}}
+          {{`{{- end }}`}}
 
-         # OpenAI Credentials
-         vault.hashicorp.com/agent-inject-secret-openai-credentials: "kv/data/secret/trading-bot/openai-token"
-         vault.hashicorp.com/agent-inject-template-openai-credentials: |
-            {{`{{- with secret "kv/data/secret/trading-bot/openai-token" -}}`}}
-            TOKEN={{`{{ .Data.data.token }}`}}
-            {{`{{- end }}`}}
+        # OpenAI Credentials
+        vault.hashicorp.com/agent-inject-secret-openai-credentials: "kv/data/secret/trading-bot/openai-token"
+        vault.hashicorp.com/agent-inject-template-openai-credentials: |
+          {{`{{- with secret "kv/data/secret/trading-bot/openai-token" -}}`}}
+          TOKEN={{`{{ .Data.data.token }}`}}
+          {{`{{- end }}`}}
 
-         # Mailgun Credentials
-         vault.hashicorp.com/agent-inject-secret-mailgun-credentials: "kv/data/secret/trading-bot/mailgun-token"
-         vault.hashicorp.com/agent-inject-template-mailgun-credentials: |
-            {{`{{- with secret "kv/data/secret/trading-bot/mailgun-token" -}}`}}
-            TOKEN={{`{{ .Data.data.token }}`}}
-            {{`{{- end }}`}}
+        # Mailgun Credentials
+        vault.hashicorp.com/agent-inject-secret-mailgun-credentials: "kv/data/secret/trading-bot/mailgun-token"
+        vault.hashicorp.com/agent-inject-template-mailgun-credentials: |
+          {{`{{- with secret "kv/data/secret/trading-bot/mailgun-token" -}}`}}
+          TOKEN={{`{{ .Data.data.token }}`}}
+          {{`{{- end }}`}}
 
-         restartedAt: "{{ now | date "2006-01-02T15:04:05Z07:00" }}"
+        # Redis credentials
+        vault.hashicorp.com/agent-inject-secret-redis-password: "kv/data/secret/redis"
+        vault.hashicorp.com/agent-inject-template-redis-password: |
+          {{`{{- with secret "kv/data/secret/redis" -}}`}}
+          {{`{{ .Data.data.password }}`}}
+          {{`{{- end }}`}}
+           
+        restartedAt: "{{ now | date "2006-01-02T15:04:05Z07:00" }}"
     spec:
       serviceAccountName: trading-bot
       automountServiceAccountToken: true
@@ -54,6 +61,16 @@ spec:
               value: /vault/secrets/config
             - name: RUN_SWING_TRADE_SCORER
               value: "false"
+            - name: APP_NAME
+              value: {{ .Chart.Name | quote }}
+            - name: APP_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
 {{- if .Values.nodeSelector }}
     nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
