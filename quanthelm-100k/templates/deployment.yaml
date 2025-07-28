@@ -61,6 +61,10 @@ spec:
               value: /vault/secrets/config
             - name: RUN_SWING_TRADE_SCORER
               value: "false"
+            - name: SWING_TRADE_ENABLED
+              value: "true"
+            - name: DAY_TRADE_ENABLED
+              value: "true"
             - name: APP_NAME
               value: {{ .Chart.Name | quote }}
             - name: APP_NAMESPACE
