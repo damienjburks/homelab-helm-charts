@@ -25,6 +25,3 @@ ingress:
     secretName: quanthelm-live-cert-tls
 
 resources: {}
-
-nodeSelector:
-  kubernetes.io/os: arm64
