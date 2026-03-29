@@ -12,6 +12,7 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
+      nodeName: dsb-pi5-02
       containers:
         - name: uptime-kuma
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -20,8 +21,8 @@ spec:
             - containerPort: {{ .Values.service.targetPort }}
           volumeMounts:
             - name: kuma-data
-              mountPath: {{ .Values.persistence.mountPath }}
+              mountPath: {{ .Values.persistence.mountPath | quote }}
       volumes:
         - name: kuma-data
           persistentVolumeClaim:
-            claimName: {{ .Release.Name }}-pvc
+            claimName: {{ .Values.persistence.existingClaim | default (printf "%s-pvc" .Release.Name) | quote }}

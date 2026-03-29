@@ -12,21 +12,18 @@ service:
 
 persistence:
   enabled: true
-  storageClass: ""
+  storageClass: "microk8s-hostpath"
   accessMode: ReadWriteOnce
-  size: 1Gi
+  size: 5Gi
   mountPath: /app/data
+  existingClaim: ""
 
 ingress:
-  className: nginx
+  className: public
   enabled: true
-  host: status.dsb-hub.local
-  annotations:
-    cert-manager.io/cluster-issuer: mkcert-issuer
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  host: status.k8s.internal
+  annotations: {}
   tls:
     enabled: true
-    host: status.dsb-hub.local  
-    secretName: uptimekuma-cert-tls
+    host: status.k8s.internal
+    secretName: app-internal-tls
