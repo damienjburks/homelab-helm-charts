@@ -23,7 +23,6 @@ spec:
                 name: {{ .Release.Name }}-env
             - secretRef:
                 name: {{ .Values.existingSecret }}
-          command: ["uvicorn", "--host", "0.0.0.0", "--port", "8000"]
           livenessProbe:
             httpGet:
               path: /health
