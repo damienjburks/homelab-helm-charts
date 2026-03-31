@@ -1,0 +1,7 @@
+apiVersion: v2
+name: sonarqube
+description: A Helm chart for deploying SonarQube locally
+type: application
+version: 0.1.0
+appVersion: "community"
+icon: https://www.sonarqube.org/favicon.ico

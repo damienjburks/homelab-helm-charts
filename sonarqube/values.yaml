@@ -1,0 +1,41 @@
+replicaCount: 1
+
+image:
+  repository: sonarqube
+  tag: community
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 9000
+
+ingress:
+  enabled: true
+  className: public
+  host: sonarqube.k8s.internal
+  annotations: {}
+  tls:
+    enabled: true
+    secretName: app-internal-tls
+
+persistence:
+  sonarqube:
+    existingClaim: smurkscloud-red-pvc
+    dataPath: /mnt/smurkscloud-red/sonarqube/data
+    logsPath: /mnt/smurkscloud-red/sonarqube/logs
+    extensionsPath: /mnt/smurkscloud-red/sonarqube/extensions
+  postgres:
+    existingClaim: smurkscloud-red-pvc
+    dataPath: /mnt/smurkscloud-red/sonarqube/postgres
+
+postgresql:
+  image:
+    repository: postgres
+    tag: "15"
+    pullPolicy: IfNotPresent
+  database: sonarqube
+  username: sonar
+  password: sonar
+  service:
+    port: 5432
