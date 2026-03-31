@@ -12,6 +12,15 @@ spec:
       labels:
         app: {{ .Release.Name }}-neo4j
     spec:
+      {{- include "prowler.nodeAffinity" . | nindent 6 }}
+      initContainers:
+        - name: remove-lock
+          image: busybox
+          command: ["sh", "-c", "rm -f /data/databases/store_lock /data/databases/neo4j/store_lock"]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              subPath: prowler/neo4j
       containers:
         - name: neo4j
           image: "{{ .Values.neo4j.image }}:{{ .Values.neo4j.tag }}"
@@ -44,12 +53,12 @@ spec:
               value: "true"
             - name: dbms.connector.bolt.listen_address
               value: "0.0.0.0:{{ .Values.neo4j.port }}"
-          livenessProbe:
+          readinessProbe:
             httpGet:
               path: /
               port: 7474
             initialDelaySeconds: 30
-            periodSeconds: 15
+            periodSeconds: 10
           volumeMounts:
             - name: data
               mountPath: /data

@@ -12,17 +12,18 @@ spec:
       labels:
         app: {{ .Release.Name }}-valkey
     spec:
+      {{- include "prowler.nodeAffinity" . | nindent 6 }}
       containers:
         - name: valkey
           image: "{{ .Values.valkey.image }}:{{ .Values.valkey.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.valkey.port }}
-          livenessProbe:
+          readinessProbe:
             exec:
               command: ["valkey-cli", "ping"]
-            initialDelaySeconds: 10
-            periodSeconds: 10
+            initialDelaySeconds: 5
+            periodSeconds: 5
           volumeMounts:
             - name: data
               mountPath: /data

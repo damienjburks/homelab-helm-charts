@@ -4,6 +4,9 @@ kind: Ingress
 metadata:
   name: {{ .Release.Name }}-ingress
   annotations:
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
+    nginx.ingress.kubernetes.io/large-client-header-buffers: "4 256k"
     {{- range $key, $value := .Values.ingress.annotations }}
     {{ $key }}: {{ $value | quote }}
     {{- end }}
@@ -15,13 +18,15 @@ spec:
   - host: {{ .Values.ingress.host }}
     http:
       paths:
-      - path: /
+      # NextAuth routes must go to the UI
+      - path: /api/auth
         pathType: Prefix
         backend:
           service:
             name: {{ .Release.Name }}-ui
             port:
               number: {{ .Values.ui.port }}
+      # Backend API
       - path: /api
         pathType: Prefix
         backend:
@@ -29,6 +34,14 @@ spec:
             name: {{ .Release.Name }}-api
             port:
               number: {{ .Values.api.port }}
+      # UI catch-all
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-ui
+            port:
+              number: {{ .Values.ui.port }}
   {{- if .Values.ingress.tls.enabled }}
   tls:
   - hosts:

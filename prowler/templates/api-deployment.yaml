@@ -12,6 +12,22 @@ spec:
       labels:
         app: {{ .Release.Name }}-api
     spec:
+      {{- include "prowler.nodeAffinity" . | nindent 6 }}
+      initContainers:
+        - name: set-ulimits
+          image: busybox
+          command: ["sh", "-c", "ulimit -n 65535"]
+          securityContext:
+            privileged: true
+        - name: wait-for-postgres
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-postgres {{ .Values.postgres.port }}; do echo waiting for postgres; sleep 2; done"]
+        - name: wait-for-valkey
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-valkey {{ .Values.valkey.port }}; do echo waiting for valkey; sleep 2; done"]
+        - name: wait-for-neo4j
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-neo4j {{ .Values.neo4j.port }}; do echo waiting for neo4j; sleep 2; done"]
       containers:
         - name: api
           image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
@@ -27,6 +43,7 @@ spec:
           securityContext:
             capabilities:
               add: ["SYS_RESOURCE"]
+            runAsNonRoot: false
           volumeMounts:
             - name: config
               mountPath: /home/prowler/.config/prowler-api

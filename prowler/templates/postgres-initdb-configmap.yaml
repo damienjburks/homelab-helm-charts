@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-postgres-initdb
+data:
+  init.sql: |
+    CREATE USER {{ .Values.postgres.user }} WITH PASSWORD '{{ .Values.postgres.password }}';
+    CREATE DATABASE {{ .Values.postgres.database }} OWNER {{ .Values.postgres.adminUser }};
+    GRANT ALL PRIVILEGES ON DATABASE {{ .Values.postgres.database }} TO {{ .Values.postgres.user }};
+    GRANT ALL PRIVILEGES ON DATABASE {{ .Values.postgres.database }} TO {{ .Values.postgres.adminUser }};

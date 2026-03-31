@@ -12,6 +12,14 @@ spec:
       labels:
         app: {{ .Release.Name }}-ui
     spec:
+      {{- include "prowler.nodeAffinity" . | nindent 6 }}
+      initContainers:
+        - name: wait-for-mcp
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-mcp {{ .Values.mcpServer.port }}; do echo waiting for mcp; sleep 2; done"]
+        - name: wait-for-postgres
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-postgres {{ .Values.postgres.port }}; do echo waiting for postgres; sleep 2; done"]
       containers:
         - name: ui
           image: "{{ .Values.ui.image }}:{{ .Values.ui.tag }}"
@@ -23,6 +31,3 @@ spec:
                 name: {{ .Release.Name }}-env
             - secretRef:
                 name: {{ .Values.existingSecret }}
-          securityContext:
-            capabilities:
-              add: ["SYS_RESOURCE"]

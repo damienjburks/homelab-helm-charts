@@ -24,7 +24,6 @@ postgres:
   image: postgres
   tag: 16.3-alpine3.20
   port: 5432
-  host: prowler-postgres
   adminUser: prowler_admin
   adminPassword: postgres
   user: prowler
@@ -34,14 +33,12 @@ postgres:
 valkey:
   image: valkey/valkey
   tag: 7-alpine3.19
-  host: prowler-valkey
   port: 6379
   db: 0
 
 neo4j:
   image: graphstack/dozerdb
   tag: 5.26.3.0
-  host: prowler-neo4j
   port: 7687
   user: neo4j
   password: neo4j_password
@@ -62,4 +59,11 @@ ingress:
 persistence:
   existingClaim: smurkscloud-red-pvc
 
+nodeAffinity:
+  requiredNodes:
+    - dsb-pi5-01
+    - dsb-pi5-02
+
+# Name of pre-existing secret containing sensitive keys.
+# Created automatically on first install via the keygen job.
 existingSecret: prowler-secrets

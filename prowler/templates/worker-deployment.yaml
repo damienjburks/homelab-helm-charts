@@ -12,6 +12,19 @@ spec:
       labels:
         app: {{ .Release.Name }}-worker
     spec:
+      {{- include "prowler.nodeAffinity" . | nindent 6 }}
+      initContainers:
+        - name: set-ulimits
+          image: busybox
+          command: ["sh", "-c", "ulimit -n 65535"]
+          securityContext:
+            privileged: true
+        - name: wait-for-postgres
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-postgres {{ .Values.postgres.port }}; do echo waiting for postgres; sleep 2; done"]
+        - name: wait-for-valkey
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-valkey {{ .Values.valkey.port }}; do echo waiting for valkey; sleep 2; done"]
       containers:
         - name: worker
           image: "{{ .Values.worker.image }}:{{ .Values.worker.tag }}"
@@ -25,6 +38,7 @@ spec:
           securityContext:
             capabilities:
               add: ["SYS_RESOURCE"]
+            runAsNonRoot: false
           volumeMounts:
             - name: output
               mountPath: /tmp/prowler_api_output
@@ -46,6 +60,19 @@ spec:
       labels:
         app: {{ .Release.Name }}-worker-beat
     spec:
+      {{- include "prowler.nodeAffinity" . | nindent 6 }}
+      initContainers:
+        - name: set-ulimits
+          image: busybox
+          command: ["sh", "-c", "ulimit -n 65535"]
+          securityContext:
+            privileged: true
+        - name: wait-for-postgres
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-postgres {{ .Values.postgres.port }}; do echo waiting for postgres; sleep 2; done"]
+        - name: wait-for-valkey
+          image: busybox
+          command: ["sh", "-c", "until nc -z {{ .Release.Name }}-valkey {{ .Values.valkey.port }}; do echo waiting for valkey; sleep 2; done"]
       containers:
         - name: worker-beat
           image: "{{ .Values.worker.image }}:{{ .Values.worker.tag }}"
@@ -59,3 +86,4 @@ spec:
           securityContext:
             capabilities:
               add: ["SYS_RESOURCE"]
+            runAsNonRoot: false

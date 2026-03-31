@@ -1,6 +1,6 @@
 apiVersion: v2
 name: prowler
-description: A Helm chart for deploying Prowler App (UI + API) in Kubernetes
+description: A Helm chart for deploying Prowler App in Kubernetes
 type: application
 version: 0.1.0
 appVersion: "stable"
