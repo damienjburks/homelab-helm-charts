@@ -19,6 +19,25 @@ spec:
           command: ["sysctl", "-w", "vm.max_map_count=524288"]
           securityContext:
             privileged: true
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/logs /opt/sonarqube/extensions"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: sonarqube-data
+              mountPath: /opt/sonarqube/data
+              subPath: data
+            - name: sonarqube-data
+              mountPath: /opt/sonarqube/logs
+              subPath: logs
+            - name: sonarqube-data
+              mountPath: /opt/sonarqube/extensions
+              subPath: extensions
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
         - name: sonarqube
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
