@@ -21,13 +21,13 @@ spec:
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
-              subPath: data
+              subPath: sonarqube/data
             - name: sonarqube-data
               mountPath: /opt/sonarqube/logs
-              subPath: logs
+              subPath: sonarqube/logs
             - name: sonarqube-data
               mountPath: /opt/sonarqube/extensions
-              subPath: extensions
+              subPath: sonarqube/extensions
       securityContext:
         runAsUser: 1000
         runAsGroup: 1000
@@ -48,13 +48,13 @@ spec:
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
-              subPath: data
+              subPath: sonarqube/data
             - name: sonarqube-data
               mountPath: /opt/sonarqube/logs
-              subPath: logs
+              subPath: sonarqube/logs
             - name: sonarqube-data
               mountPath: /opt/sonarqube/extensions
-              subPath: extensions
+              subPath: sonarqube/extensions
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
