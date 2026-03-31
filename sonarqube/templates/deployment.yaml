@@ -13,12 +13,6 @@ spec:
         app: {{ .Release.Name }}
     spec:
       initContainers:
-        # SonarQube requires vm.max_map_count >= 524288
-        - name: init-sysctl
-          image: busybox
-          command: ["sysctl", "-w", "vm.max_map_count=524288"]
-          securityContext:
-            privileged: true
         - name: fix-permissions
           image: busybox
           command: ["sh", "-c", "chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/logs /opt/sonarqube/extensions"]
