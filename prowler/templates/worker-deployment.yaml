@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-worker
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-worker
+    spec:
+      containers:
+        - name: worker
+          image: "{{ .Values.worker.image }}:{{ .Values.worker.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-env
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          command: ["/home/prowler/docker-entrypoint.sh", "worker"]
+          securityContext:
+            capabilities:
+              add: ["SYS_RESOURCE"]
+          volumeMounts:
+            - name: output
+              mountPath: /tmp/prowler_api_output
+      volumes:
+        - name: output
+          emptyDir: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker-beat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-worker-beat
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-worker-beat
+    spec:
+      containers:
+        - name: worker-beat
+          image: "{{ .Values.worker.image }}:{{ .Values.worker.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-env
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          command: ["/home/prowler/docker-entrypoint.sh", "beat"]
+          securityContext:
+            capabilities:
+              add: ["SYS_RESOURCE"]

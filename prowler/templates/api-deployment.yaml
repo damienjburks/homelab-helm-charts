@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-api
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-api
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.api.image }}:{{ .Values.api.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.api.port }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-env
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          command: ["/home/prowler/docker-entrypoint.sh", "prod"]
+          securityContext:
+            capabilities:
+              add: ["SYS_RESOURCE"]
+          volumeMounts:
+            - name: config
+              mountPath: /home/prowler/.config/prowler-api
+              subPath: prowler/api/config
+            - name: output
+              mountPath: /tmp/prowler_api_output
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | quote }}
+        - name: output
+          emptyDir: {}

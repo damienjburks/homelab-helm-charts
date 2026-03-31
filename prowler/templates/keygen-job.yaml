@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-keygen
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    spec:
+      serviceAccountName: {{ .Release.Name }}-keygen
+      restartPolicy: OnFailure
+      containers:
+        - name: keygen
+          image: alpine/openssl
+          command:
+            - sh
+            - -c
+            - |
+              # Skip if secret already exists
+              if kubectl get secret {{ .Values.existingSecret }} > /dev/null 2>&1; then
+                echo "Secret already exists, skipping."
+                exit 0
+              fi
+              openssl genrsa -out /tmp/private.pem 2048
+              openssl rsa -in /tmp/private.pem -pubout -out /tmp/public.pem
+              kubectl create secret generic {{ .Values.existingSecret }} \
+                --from-literal=AUTH_SECRET="$(openssl rand -base64 32)" \
+                --from-literal=DJANGO_SECRETS_ENCRYPTION_KEY="$(openssl rand -base64 32)" \
+                --from-file=DJANGO_TOKEN_SIGNING_KEY=/tmp/private.pem \
+                --from-file=DJANGO_TOKEN_VERIFYING_KEY=/tmp/public.pem
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-keygen
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-keygen
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-keygen
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Release.Name }}-keygen
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-keygen
+    namespace: {{ .Release.Namespace }}

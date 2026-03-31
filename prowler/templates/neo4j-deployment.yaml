@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-neo4j
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-neo4j
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-neo4j
+    spec:
+      containers:
+        - name: neo4j
+          image: "{{ .Values.neo4j.image }}:{{ .Values.neo4j.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.neo4j.port }}
+            - containerPort: 7474
+          env:
+            - name: NEO4J_AUTH
+              value: "{{ .Values.neo4j.user }}/{{ .Values.neo4j.password }}"
+            - name: NEO4J_dbms_max__databases
+              value: {{ .Values.neo4j.maxDatabases | quote }}
+            - name: NEO4J_server_memory_pagecache_size
+              value: {{ .Values.neo4j.pagecacheSize | quote }}
+            - name: NEO4J_server_memory_heap_initial__size
+              value: {{ .Values.neo4j.heapInitialSize | quote }}
+            - name: NEO4J_server_memory_heap_max__size
+              value: {{ .Values.neo4j.heapMaxSize | quote }}
+            - name: NEO4J_PLUGINS
+              value: '["apoc"]'
+            - name: NEO4J_dbms_security_procedures_allowlist
+              value: "apoc.*"
+            - name: NEO4J_dbms_security_procedures_unrestricted
+              value: "apoc.*"
+            - name: apoc.export.file.enabled
+              value: "true"
+            - name: apoc.import.file.enabled
+              value: "true"
+            - name: apoc.import.file.use_neo4j_config
+              value: "true"
+            - name: dbms.connector.bolt.listen_address
+              value: "0.0.0.0:{{ .Values.neo4j.port }}"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 7474
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          volumeMounts:
+            - name: data
+              mountPath: /data
+              subPath: prowler/neo4j
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | quote }}

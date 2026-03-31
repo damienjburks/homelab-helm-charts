@@ -1,0 +1,65 @@
+image:
+  pullPolicy: Always
+
+api:
+  image: prowlercloud/prowler-api
+  tag: stable
+  port: 8080
+
+ui:
+  image: prowlercloud/prowler-ui
+  tag: stable
+  port: 3000
+
+mcpServer:
+  image: prowlercloud/prowler-mcp
+  tag: stable
+  port: 8000
+
+worker:
+  image: prowlercloud/prowler-api
+  tag: stable
+
+postgres:
+  image: postgres
+  tag: 16.3-alpine3.20
+  port: 5432
+  host: prowler-postgres
+  adminUser: prowler_admin
+  adminPassword: postgres
+  user: prowler
+  password: postgres
+  database: prowler_db
+
+valkey:
+  image: valkey/valkey
+  tag: 7-alpine3.19
+  host: prowler-valkey
+  port: 6379
+  db: 0
+
+neo4j:
+  image: graphstack/dozerdb
+  tag: 5.26.3.0
+  host: prowler-neo4j
+  port: 7687
+  user: neo4j
+  password: neo4j_password
+  pagecacheSize: 1G
+  heapInitialSize: 1G
+  heapMaxSize: 1G
+  maxDatabases: 1000
+
+ingress:
+  enabled: true
+  className: public
+  host: prowler.k8s.internal
+  annotations: {}
+  tls:
+    enabled: true
+    secretName: app-internal-tls
+
+persistence:
+  existingClaim: smurkscloud-red-pvc
+
+existingSecret: prowler-secrets

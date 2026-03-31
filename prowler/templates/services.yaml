@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-ui
+spec:
+  selector:
+    app: {{ .Release.Name }}-ui
+  ports:
+    - port: {{ .Values.ui.port }}
+      targetPort: {{ .Values.ui.port }}
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-api
+spec:
+  selector:
+    app: {{ .Release.Name }}-api
+  ports:
+    - port: {{ .Values.api.port }}
+      targetPort: {{ .Values.api.port }}
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-mcp
+spec:
+  selector:
+    app: {{ .Release.Name }}-mcp
+  ports:
+    - port: {{ .Values.mcpServer.port }}
+      targetPort: {{ .Values.mcpServer.port }}
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-postgres
+spec:
+  selector:
+    app: {{ .Release.Name }}-postgres
+  ports:
+    - port: {{ .Values.postgres.port }}
+      targetPort: {{ .Values.postgres.port }}
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-valkey
+spec:
+  selector:
+    app: {{ .Release.Name }}-valkey
+  ports:
+    - port: {{ .Values.valkey.port }}
+      targetPort: {{ .Values.valkey.port }}
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-neo4j
+spec:
+  selector:
+    app: {{ .Release.Name }}-neo4j
+  ports:
+    - name: bolt
+      port: {{ .Values.neo4j.port }}
+      targetPort: {{ .Values.neo4j.port }}
+    - name: http
+      port: 7474
+      targetPort: 7474
+  type: ClusterIP

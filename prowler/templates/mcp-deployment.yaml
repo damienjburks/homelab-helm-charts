@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mcp
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mcp
+    spec:
+      containers:
+        - name: mcp
+          image: "{{ .Values.mcpServer.image }}:{{ .Values.mcpServer.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.mcpServer.port }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-env
+            - secretRef:
+                name: {{ .Values.existingSecret }}
+          command: ["uvicorn", "--host", "0.0.0.0", "--port", "8000"]
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.mcpServer.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
