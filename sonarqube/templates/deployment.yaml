@@ -15,7 +15,7 @@ spec:
       initContainers:
         - name: fix-permissions
           image: busybox
-          command: ["sh", "-c", "chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/logs /opt/sonarqube/extensions"]
+          command: ["sh", "-c", "mkdir -p /opt/sonarqube/data /opt/sonarqube/logs /opt/sonarqube/extensions && chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/logs /opt/sonarqube/extensions"]
           securityContext:
             runAsUser: 0
           volumeMounts:
