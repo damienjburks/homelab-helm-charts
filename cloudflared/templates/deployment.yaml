@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      pod: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        pod: {{ .Release.Name }}
+    spec:
+      securityContext:
+        sysctls:
+          - name: net.ipv4.ping_group_range
+            value: "65532 65532"
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tunnel.secretName }}
+                  key: {{ .Values.tunnel.secretKey }}
+          command:
+            - cloudflared
+            - tunnel
+            - --no-autoupdate
+            - --loglevel
+            - {{ .Values.tunnel.logLevel }}
+            - --metrics
+            - {{ .Values.tunnel.metricsAddress }}
+            - run
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 2000
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}

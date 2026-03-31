@@ -1,0 +1,17 @@
+replicaCount: 2
+
+image:
+  repository: cloudflare/cloudflared
+  tag: latest
+  pullPolicy: Always
+
+tunnel:
+  secretName: cloudflare-tunnel-token
+  secretKey: token
+  logLevel: info
+  metricsAddress: "0.0.0.0:2000"
+
+livenessProbe:
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 1
