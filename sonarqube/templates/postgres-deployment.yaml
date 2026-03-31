@@ -12,6 +12,10 @@ spec:
       labels:
         app: {{ .Release.Name }}-postgres
     spec:
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
       containers:
         - name: postgres
           image: "{{ .Values.postgresql.image.repository }}:{{ .Values.postgresql.image.tag }}"
@@ -25,6 +29,8 @@ spec:
               value: {{ .Values.postgresql.username | quote }}
             - name: POSTGRES_PASSWORD
               value: {{ .Values.postgresql.password | quote }}
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
