@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-cleanup
+  annotations:
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: cleanup
+          image: busybox
+          command:
+            - sh
+            - -c
+            - |
+              rm -rf /data/prowler/postgres/pgdata
+              rm -rf /data/prowler/neo4j
+              rm -rf /data/prowler/valkey
+              rm -rf /data/prowler/api
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | quote }}

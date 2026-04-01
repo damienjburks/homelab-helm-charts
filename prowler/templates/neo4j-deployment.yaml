@@ -16,7 +16,7 @@ spec:
       initContainers:
         - name: remove-lock
           image: busybox
-          command: ["sh", "-c", "rm -f /data/databases/store_lock /data/databases/neo4j/store_lock"]
+          command: ["sh", "-c", "find /data/databases -name '*.lock' -o -name 'store_lock' -o -name 'neostore' -type f -name '*.lock' | xargs rm -f; rm -f /data/databases/store_lock /data/databases/system/neostore.lock /data/databases/neo4j/neostore.lock"]
           volumeMounts:
             - name: data
               mountPath: /data
