@@ -31,7 +31,7 @@ ingress:
 wazuh:
   enabled: true
   manager: 10.0.0.22
-  group: kubernetes
+  group: k8s
   persistence:
     enabled: true
     existingClaim: ""
