@@ -19,7 +19,7 @@ spec:
       {{- end }}
         - name: remove-lock
           image: busybox
-          command: ["sh", "-c", "find /data/databases -name '*.lock' -o -name 'store_lock' -o -name 'neostore' -type f -name '*.lock' | xargs rm -f; rm -f /data/databases/store_lock /data/databases/system/neostore.lock /data/databases/neo4j/neostore.lock"]
+          command: ["sh", "-c", "find /data/databases -type f \\( -name '*.lock' -o -name 'store_lock' \\) -delete 2>/dev/null; rm -f /data/databases/store_lock /data/databases/system/neostore.lock /data/databases/neo4j/neostore.lock; rm -rf /data/databases/system/schema/index/failure 2>/dev/null; echo 'Lock cleanup done.'"]
           volumeMounts:
             - name: data
               mountPath: /data
