@@ -37,5 +37,5 @@ wazuh:
     existingClaim: ""
     name: ""
     accessMode: ReadWriteOnce
-    size: 5Gi
+    size: 2Gi
     storageClass: microk8s-hostpath

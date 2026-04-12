@@ -12,7 +12,8 @@ spec:
       labels:
         app: {{ .Release.Name }}
     spec:
-      nodeName: dsb-pi5-02
+      nodeSelector:
+        kubernetes.io/hostname: dsb-pi5-02
       securityContext:
         fsGroup: 999
         fsGroupChangePolicy: OnRootMismatch
