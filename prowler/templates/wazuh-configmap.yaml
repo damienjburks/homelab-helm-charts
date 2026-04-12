@@ -1,5 +1,5 @@
 {{- if .Values.wazuh.enabled }}
-{{- $components := list "api" "ui" "worker" "worker-beat" "mcp" "neo4j" "valkey" }}
+{{- $components := list "ui" "worker" "worker-beat" "mcp" }}
 {{- range $component := $components }}
 apiVersion: v1
 kind: ConfigMap
@@ -15,6 +15,10 @@ data:
           <protocol>tcp</protocol>
         </server>
         <config-profile>kubernetes,prowler-{{ $component }}</config-profile>
+        <enrollment>
+          <agent_name>{{ $.Release.Name }}-{{ $component }}</agent_name>
+          <groups>{{ $.Values.wazuh.group | default "k8s" }}</groups>
+        </enrollment>
       </client>
 
       <localfile>

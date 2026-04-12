@@ -14,9 +14,6 @@ spec:
     spec:
       {{- include "prowler.nodeAffinity" . | nindent 6 }}
       initContainers:
-      {{- if .Values.wazuh.enabled }}
-        {{- include "prowler.wazuhInitContainers" (dict "root" . "component" "neo4j") | nindent 8 }}
-      {{- end }}
         - name: remove-lock
           image: busybox
           command: ["sh", "-c", "find /data/databases -name '*.lock' -o -name 'store_lock' -o -name 'neostore' -type f -name '*.lock' | xargs rm -f; rm -f /data/databases/store_lock /data/databases/system/neostore.lock /data/databases/neo4j/neostore.lock"]
@@ -66,16 +63,7 @@ spec:
             - name: data
               mountPath: /data
               subPath: prowler/neo4j
-          {{- if .Values.wazuh.enabled }}
-            {{- include "prowler.wazuhAppVolumeMount" . | nindent 12 }}
-          {{- end }}
-      {{- if .Values.wazuh.enabled }}
-        {{- include "prowler.wazuhSidecar" (dict "root" . "component" "neo4j") | nindent 8 }}
-      {{- end }}
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim | quote }}
-      {{- if .Values.wazuh.enabled }}
-        {{- include "prowler.wazuhVolumes" (dict "root" . "component" "neo4j") | nindent 8 }}
-      {{- end }}
