@@ -36,7 +36,6 @@ Usage: {{ include "prowler.wazuhInitContainers" (dict "root" . "component" "api"
   volumeMounts:
     - name: wazuh-agent-data
       mountPath: /agent
-      subPath: prowler/wazuh/{{ .component }}
 - name: fix-wazuh-agent-perms
   image: busybox:1.36
   imagePullPolicy: IfNotPresent
@@ -54,7 +53,6 @@ Usage: {{ include "prowler.wazuhInitContainers" (dict "root" . "component" "api"
   volumeMounts:
     - name: wazuh-agent-data
       mountPath: /agent
-      subPath: prowler/wazuh/{{ .component }}
 {{- end -}}
 
 {{/*
@@ -77,7 +75,6 @@ Usage: {{ include "prowler.wazuhSidecar" (dict "root" . "component" "api") | nin
   volumeMounts:
     - name: wazuh-agent-data
       mountPath: /var/ossec
-      subPath: prowler/wazuh/{{ .component }}
     - name: shared-logs
       mountPath: /shared-logs
     - name: wazuh-agent-config
@@ -94,7 +91,7 @@ Usage: {{ include "prowler.wazuhVolumes" (dict "root" . "component" "api") | nin
   emptyDir: {}
 - name: wazuh-agent-data
   persistentVolumeClaim:
-    claimName: {{ .root.Values.wazuh.persistence.existingClaim | quote }}
+    claimName: {{ printf "%s-%s-wazuh-pvc" .root.Release.Name .component | quote }}
 - name: wazuh-agent-config
   configMap:
     name: {{ printf "%s-%s-wazuh-agent-config" .root.Release.Name .component }}

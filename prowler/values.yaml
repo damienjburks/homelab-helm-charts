@@ -73,5 +73,15 @@ wazuh:
   enabled: true
   manager: 10.0.0.22
   group: k8s
+  components:
+    - ui
+    - worker
+    - worker-beat
+    - mcp
+    - api
+    - neo4j
+    - valkey
+    - postgres
   persistence:
-    existingClaim: smurkscloud-red-pvc
+    storageClass: microk8s-hostpath
+    size: 5Gi
