@@ -20,6 +20,7 @@ wazuh:
   enabled: true
   manager: 10.0.0.22
   group: k8s
+  agentImage: wazuh/wazuh-agent:4.7.5
   persistence:
     storageClass: microk8s-hostpath
     size: 5Gi

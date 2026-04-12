@@ -4,7 +4,7 @@ Usage: {{ include "sonarqube.wazuhInitContainers" (dict "root" . "component" "so
 */}}
 {{- define "sonarqube.wazuhInitContainers" -}}
 - name: seed-wazuh-agent-state
-  image: wazuh/wazuh-agent:4.14.4
+  image: {{ .root.Values.wazuh.agentImage }}
   imagePullPolicy: IfNotPresent
   securityContext:
     runAsUser: 0
@@ -54,7 +54,7 @@ Usage: {{ include "sonarqube.wazuhSidecar" (dict "root" . "component" "sonarqube
 */}}
 {{- define "sonarqube.wazuhSidecar" -}}
 - name: wazuh-agent
-  image: wazuh/wazuh-agent:4.14.4
+  image: {{ .root.Values.wazuh.agentImage }}
   imagePullPolicy: IfNotPresent
   securityContext:
     runAsUser: 0

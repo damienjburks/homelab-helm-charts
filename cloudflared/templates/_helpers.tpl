@@ -4,7 +4,7 @@ Usage: {{ include "cloudflared.wazuhInitContainers" . | nindent 8 }}
 */}}
 {{- define "cloudflared.wazuhInitContainers" -}}
 - name: seed-wazuh-agent-state
-  image: wazuh/wazuh-agent:4.14.4
+  image: {{ .Values.wazuh.agentImage }}
   imagePullPolicy: IfNotPresent
   securityContext:
     runAsUser: 0
