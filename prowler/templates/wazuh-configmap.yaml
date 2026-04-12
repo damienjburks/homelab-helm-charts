@@ -17,7 +17,7 @@ data:
         <config-profile>kubernetes,prowler-{{ $component }}</config-profile>
         <enrollment>
           <agent_name>{{ $.Release.Name }}-{{ $component }}</agent_name>
-          <groups>{{ $.Values.wazuh.group | default "k8s" }}</groups>
+          <groups>{{ $.Values.wazuh.group | default "kubernetes" }}</groups>
         </enrollment>
       </client>
 
