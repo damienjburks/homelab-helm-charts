@@ -17,6 +17,10 @@ spec:
         sysctls:
           - name: net.ipv4.ping_group_range
             value: "65532 65532"
+      {{- if .Values.wazuh.enabled }}
+      initContainers:
+        {{- include "cloudflared.wazuhInitContainers" . | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Release.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -43,3 +47,41 @@ spec:
             failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
             initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+          {{- if .Values.wazuh.enabled }}
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /shared-logs
+          {{- end }}
+      {{- if .Values.wazuh.enabled }}
+        - name: wazuh-agent
+          image: wazuh/wazuh-agent:4.14.4
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          env:
+            - name: WAZUH_MANAGER
+              value: {{ .Values.wazuh.manager | quote }}
+            - name: WAZUH_AGENT_NAME
+              value: {{ printf "%s-cloudflared" .Release.Name | quote }}
+            - name: WAZUH_AGENT_GROUP
+              value: {{ .Values.wazuh.group | default "k8s" | quote }}
+          volumeMounts:
+            - name: wazuh-agent-data
+              mountPath: /var/ossec
+            - name: shared-logs
+              mountPath: /shared-logs
+            - name: wazuh-agent-config
+              mountPath: /wazuh-config-mount/etc/ossec.conf
+              subPath: ossec.conf
+      {{- end }}
+      {{- if .Values.wazuh.enabled }}
+      volumes:
+        - name: shared-logs
+          emptyDir: {}
+        - name: wazuh-agent-data
+          persistentVolumeClaim:
+            claimName: {{ printf "%s-cloudflared-wazuh-pvc" .Release.Name | quote }}
+        - name: wazuh-agent-config
+          configMap:
+            name: {{ .Release.Name }}-cloudflared-wazuh-agent-config
+      {{- end }}

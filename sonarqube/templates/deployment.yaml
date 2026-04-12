@@ -13,6 +13,9 @@ spec:
         app: {{ .Release.Name }}
     spec:
       initContainers:
+      {{- if .Values.wazuh.enabled }}
+        {{- include "sonarqube.wazuhInitContainers" (dict "root" . "component" "sonarqube") | nindent 8 }}
+      {{- end }}
         - name: fix-permissions
           image: busybox
           command: ["sh", "-c", "mkdir -p /opt/sonarqube/data /opt/sonarqube/logs /opt/sonarqube/extensions && chown -R 1000:1000 /opt/sonarqube/data /opt/sonarqube/logs /opt/sonarqube/extensions"]
@@ -55,7 +58,16 @@ spec:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/extensions
               subPath: sonarqube/extensions
+          {{- if .Values.wazuh.enabled }}
+            {{- include "sonarqube.wazuhAppVolumeMount" . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.wazuh.enabled }}
+        {{- include "sonarqube.wazuhSidecar" (dict "root" . "component" "sonarqube") | nindent 8 }}
+      {{- end }}
       volumes:
         - name: sonarqube-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.sonarqube.existingClaim | quote }}
+      {{- if .Values.wazuh.enabled }}
+        {{- include "sonarqube.wazuhVolumes" (dict "root" . "component" "sonarqube") | nindent 8 }}
+      {{- end }}

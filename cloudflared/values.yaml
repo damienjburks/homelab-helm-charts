@@ -15,3 +15,11 @@ livenessProbe:
   initialDelaySeconds: 10
   periodSeconds: 10
   failureThreshold: 1
+
+wazuh:
+  enabled: true
+  manager: 10.0.0.22
+  group: k8s
+  persistence:
+    storageClass: microk8s-hostpath
+    size: 5Gi

@@ -17,6 +17,9 @@ spec:
         runAsGroup: 999
         fsGroup: 999
       initContainers:
+      {{- if .Values.wazuh.enabled }}
+        {{- include "sonarqube.wazuhInitContainers" (dict "root" . "component" "postgres") | nindent 8 }}
+      {{- end }}
         - name: fix-permissions
           image: busybox
           command: ["sh", "-c", "mkdir -p /var/lib/postgresql/data/pgdata && chown -R 999:999 /var/lib/postgresql/data/pgdata && chmod 0750 /var/lib/postgresql/data/pgdata"]
@@ -45,7 +48,16 @@ spec:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
               subPath: sonarqube/postgres
+          {{- if .Values.wazuh.enabled }}
+            {{- include "sonarqube.wazuhAppVolumeMount" . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.wazuh.enabled }}
+        {{- include "sonarqube.wazuhSidecar" (dict "root" . "component" "postgres") | nindent 8 }}
+      {{- end }}
       volumes:
         - name: postgres-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.postgres.existingClaim | quote }}
+      {{- if .Values.wazuh.enabled }}
+        {{- include "sonarqube.wazuhVolumes" (dict "root" . "component" "postgres") | nindent 8 }}
+      {{- end }}

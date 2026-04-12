@@ -1,0 +1,19 @@
+{{- if .Values.wazuh.enabled }}
+{{- range $component := list "sonarqube" "postgres" }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $.Release.Name }}-{{ $component }}-wazuh-pvc
+  labels:
+    app.kubernetes.io/name: {{ $.Release.Name }}
+    app.kubernetes.io/component: {{ $component }}-wazuh-agent
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ $.Values.wazuh.persistence.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ $.Values.wazuh.persistence.size | quote }}
+---
+{{- end }}
+{{- end }}
