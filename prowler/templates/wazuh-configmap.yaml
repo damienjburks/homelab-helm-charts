@@ -1,5 +1,5 @@
 {{- if .Values.wazuh.enabled }}
-{{- $components := list "api" "ui" "worker" "worker-beat" "mcp" "neo4j" "postgres" "valkey" }}
+{{- $components := list "api" "ui" "worker" "worker-beat" "mcp" "neo4j" "valkey" }}
 {{- range $component := $components }}
 apiVersion: v1
 kind: ConfigMap

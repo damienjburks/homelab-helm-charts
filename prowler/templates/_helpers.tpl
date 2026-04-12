@@ -73,7 +73,7 @@ Usage: {{ include "prowler.wazuhSidecar" (dict "root" . "component" "api") | nin
     - name: WAZUH_AGENT_NAME
       value: {{ printf "%s-%s" .root.Release.Name .component | quote }}
     - name: WAZUH_AGENT_GROUP
-      value: {{ .root.Values.wazuh.group | default "kubernetes" | quote }}
+      value: {{ .root.Values.wazuh.group | default "k8s" | quote }}
   volumeMounts:
     - name: wazuh-agent-data
       mountPath: /var/ossec
