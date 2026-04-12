@@ -12,11 +12,10 @@ service:
 
 persistence:
   enabled: true
-  storageClass: "microk8s-hostpath"
+  existingClaim: ""
   accessMode: ReadWriteOnce
   size: 5Gi
-  mountPath: /app/data
-  existingClaim: ""
+  storageClass: microk8s-hostpath
 
 ingress:
   className: public
@@ -29,6 +28,13 @@ ingress:
     secretName: app-internal-tls
 
 wazuh:
-  manager: "10.0.0.22"
-  group: "kubernetes"
-  agentPvc: "uptime-kuma-wazuh-agent-pvc"
+  enabled: true
+  manager: 10.0.0.22
+  group: kubernetes
+  persistence:
+    enabled: true
+    existingClaim: ""
+    name: ""
+    accessMode: ReadWriteOnce
+    size: 5Gi
+    storageClass: microk8s-hostpath

@@ -3,6 +3,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: {{ .Release.Name }}-pvc
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/component: app-storage
 spec:
   accessModes:
     - {{ .Values.persistence.accessMode | quote }}
@@ -12,4 +15,26 @@ spec:
   {{- if .Values.persistence.storageClass }}
   storageClassName: {{ .Values.persistence.storageClass | quote }}
   {{- end }}
+---
+{{- end }}
+
+{{- if .Values.wazuh.enabled }}
+{{- if and .Values.wazuh.persistence.enabled (not .Values.wazuh.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.wazuh.persistence.name | default (printf "%s-wazuh-agent-pvc" .Release.Name) }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/component: wazuh-agent-storage
+spec:
+  accessModes:
+    - {{ .Values.wazuh.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.wazuh.persistence.size | quote }}
+  {{- if .Values.wazuh.persistence.storageClass }}
+  storageClassName: {{ .Values.wazuh.persistence.storageClass | quote }}
+  {{- end }}
+{{- end }}
 {{- end }}
