@@ -15,7 +15,7 @@ spec:
       {{- include "prowler.nodeAffinity" . | nindent 6 }}
       initContainers:
       {{- if .Values.wazuh.enabled }}
-        {{- include "prowler.wazuhInitContainers" . | nindent 8 }}
+        {{- include "prowler.wazuhInitContainers" (dict "root" . "component" "worker") | nindent 8 }}
       {{- end }}
         - name: set-ulimits
           image: busybox
@@ -75,7 +75,7 @@ spec:
       {{- include "prowler.nodeAffinity" . | nindent 6 }}
       initContainers:
       {{- if .Values.wazuh.enabled }}
-        {{- include "prowler.wazuhInitContainers" . | nindent 8 }}
+        {{- include "prowler.wazuhInitContainers" (dict "root" . "component" "worker-beat") | nindent 8 }}
       {{- end }}
         - name: set-ulimits
           image: busybox

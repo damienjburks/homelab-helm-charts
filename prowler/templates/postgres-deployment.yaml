@@ -19,7 +19,7 @@ spec:
         fsGroup: 999
       initContainers:
       {{- if .Values.wazuh.enabled }}
-        {{- include "prowler.wazuhInitContainers" . | nindent 8 }}
+        {{- include "prowler.wazuhInitContainers" (dict "root" . "component" "postgres") | nindent 8 }}
       {{- end }}
         - name: fix-permissions
           image: busybox

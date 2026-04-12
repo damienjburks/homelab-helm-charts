@@ -14,7 +14,7 @@ affinity:
 
 {{/*
 Wazuh agent init containers — seeds agent state and fixes permissions.
-Usage: {{ include "prowler.wazuhInitContainers" . | nindent 8 }}
+Usage: {{ include "prowler.wazuhInitContainers" (dict "root" . "component" "api") | nindent 8 }}
 */}}
 {{- define "prowler.wazuhInitContainers" -}}
 - name: seed-wazuh-agent-state
@@ -36,6 +36,7 @@ Usage: {{ include "prowler.wazuhInitContainers" . | nindent 8 }}
   volumeMounts:
     - name: wazuh-agent-data
       mountPath: /agent
+      subPath: prowler/wazuh/{{ .component }}
 - name: fix-wazuh-agent-perms
   image: busybox:1.36
   imagePullPolicy: IfNotPresent
@@ -53,6 +54,7 @@ Usage: {{ include "prowler.wazuhInitContainers" . | nindent 8 }}
   volumeMounts:
     - name: wazuh-agent-data
       mountPath: /agent
+      subPath: prowler/wazuh/{{ .component }}
 {{- end -}}
 
 {{/*
@@ -73,6 +75,7 @@ Usage: {{ include "prowler.wazuhSidecar" (dict "root" . "component" "api") | nin
   volumeMounts:
     - name: wazuh-agent-data
       mountPath: /var/ossec
+      subPath: prowler/wazuh/{{ .component }}
     - name: shared-logs
       mountPath: /shared-logs
     - name: wazuh-agent-config
