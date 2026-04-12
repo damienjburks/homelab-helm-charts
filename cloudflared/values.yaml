@@ -16,11 +16,16 @@ livenessProbe:
   periodSeconds: 10
   failureThreshold: 1
 
+# Wazuh agent sidecar — disabled until an ARM64-compatible image is available.
+# The official wazuh/wazuh-agent image (4.14.x) requires ARMv8.2-a (Graviton 2+),
+# and older tags only ship linux/amd64. These nodes schedule across Pi 4 and Pi 5,
+# so no official image works here today. Re-enable once a compatible image is sourced
+# (e.g. opennix/wazuh-agent or a custom build).
 wazuh:
-  enabled: true
+  enabled: false
+  # agentImage: wazuh/wazuh-agent:4.7.5
   manager: 10.0.0.22
   group: k8s
-  agentImage: wazuh/wazuh-agent:4.7.5
   persistence:
     storageClass: microk8s-hostpath
-    size: 5Gi
+    size: 512Mi
