@@ -72,7 +72,7 @@ existingSecret: prowler-secrets
 wazuh:
   enabled: true
   manager: 10.0.0.22
-  group: k8s
+  group: kubernetes
   components:
     - ui
     - worker
