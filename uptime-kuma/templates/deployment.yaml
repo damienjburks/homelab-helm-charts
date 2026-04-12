@@ -13,6 +13,49 @@ spec:
         app: {{ .Release.Name }}
     spec:
       nodeName: dsb-pi5-02
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+
+      initContainers:
+        - name: seed-wazuh-agent-state
+          image: wazuh/wazuh-agent:4.14.4
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          command: ["/bin/sh", "-lc"]
+          args:
+            - |
+              set -euo pipefail
+              mkdir -p /agent
+              if [ ! -d /agent/bin ] && [ ! -f /agent/etc/ossec.conf ]; then
+                echo "[init] Seeding /var/ossec into PVC..."
+                tar -C /var/ossec -cf - . | tar -C /agent -xpf -
+              else
+                echo "[init] Existing Wazuh agent state found; skipping seed."
+              fi
+          volumeMounts:
+            - name: wazuh-agent-data
+              mountPath: /agent
+
+        - name: fix-wazuh-agent-perms
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+          command: ["/bin/sh", "-lc"]
+          args:
+            - |
+              set -e
+              for d in etc logs queue var rids tmp active-response; do
+                [ -d "/agent/$d" ] && chown -R 999:999 "/agent/$d"
+              done
+              [ -d /agent/bin ] && chown -R 0:0 /agent/bin || true
+              [ -d /agent/lib ] && chown -R 0:0 /agent/lib || true
+          volumeMounts:
+            - name: wazuh-agent-data
+              mountPath: /agent
+
       containers:
         - name: uptime-kuma
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -22,7 +65,40 @@ spec:
           volumeMounts:
             - name: kuma-data
               mountPath: {{ .Values.persistence.mountPath | quote }}
+            - name: shared-logs
+              mountPath: /shared-logs
+
+        - name: wazuh-agent
+          image: wazuh/wazuh-agent:4.14.4
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: WAZUH_MANAGER
+              value: {{ .Values.wazuh.manager | quote }}
+            - name: WAZUH_AGENT_NAME
+              value: "{{ .Release.Name }}-uptime-kuma"
+            - name: WAZUH_AGENT_GROUP
+              value: {{ .Values.wazuh.group | default "kubernetes" | quote }}
+          volumeMounts:
+            - name: wazuh-agent-data
+              mountPath: /var/ossec
+            - name: shared-logs
+              mountPath: /shared-logs
+            - name: wazuh-agent-config
+              mountPath: /wazuh-config-mount/etc/ossec.conf
+              subPath: ossec.conf
+
       volumes:
         - name: kuma-data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim | default (printf "%s-pvc" .Release.Name) | quote }}
+
+        - name: shared-logs
+          emptyDir: {}
+
+        - name: wazuh-agent-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.wazuh.agentPvc | default (printf "%s-wazuh-agent-pvc" .Release.Name) | quote }}
+
+        - name: wazuh-agent-config
+          configMap:
+            name: {{ .Release.Name }}-wazuh-agent-config

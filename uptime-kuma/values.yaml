@@ -27,3 +27,8 @@ ingress:
     enabled: true
     host: status.k8s.internal
     secretName: app-internal-tls
+
+wazuh:
+  manager: "10.0.0.22"
+  group: "kubernetes"
+  agentPvc: "uptime-kuma-wazuh-agent-pvc"
