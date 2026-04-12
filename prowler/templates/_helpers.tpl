@@ -53,6 +53,13 @@ Usage: {{ include "prowler.wazuhInitContainers" (dict "root" . "component" "api"
   volumeMounts:
     - name: wazuh-agent-data
       mountPath: /agent
+- name: create-shared-logs
+  image: busybox:1.36
+  imagePullPolicy: IfNotPresent
+  command: ["sh", "-c", "touch /shared-logs/{{ .component }}.log"]
+  volumeMounts:
+    - name: shared-logs
+      mountPath: /shared-logs
 {{- end -}}
 
 {{/*

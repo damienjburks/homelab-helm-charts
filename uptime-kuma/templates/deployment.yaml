@@ -57,6 +57,14 @@ spec:
           volumeMounts:
             - name: wazuh-agent-data
               mountPath: /agent
+
+        - name: create-shared-logs
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command: ["sh", "-c", "touch /shared-logs/uptime-kuma.log"]
+          volumeMounts:
+            - name: shared-logs
+              mountPath: /shared-logs
       {{- end }}
 
       containers:
