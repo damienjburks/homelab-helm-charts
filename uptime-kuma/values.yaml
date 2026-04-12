@@ -15,6 +15,7 @@ persistence:
   existingClaim: ""
   accessMode: ReadWriteOnce
   size: 5Gi
+  mountPath: "/app/data"
   storageClass: microk8s-hostpath
 
 ingress:
