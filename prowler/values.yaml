@@ -67,3 +67,10 @@ nodeAffinity:
 # Name of pre-existing secret containing sensitive keys.
 # Created automatically on first install via the keygen job.
 existingSecret: prowler-secrets
+
+wazuh:
+  enabled: true
+  manager: 10.0.0.22
+  group: kubernetes
+  persistence:
+    existingClaim: smurkscloud-red-pvc

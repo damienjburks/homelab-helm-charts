@@ -14,6 +14,9 @@ spec:
     spec:
       {{- include "prowler.nodeAffinity" . | nindent 6 }}
       initContainers:
+      {{- if .Values.wazuh.enabled }}
+        {{- include "prowler.wazuhInitContainers" . | nindent 8 }}
+      {{- end }}
         - name: wait-for-mcp
           image: busybox
           command: ["sh", "-c", "until nc -z {{ .Release.Name }}-mcp {{ .Values.mcpServer.port }}; do echo waiting for mcp; sleep 2; done"]
@@ -31,3 +34,14 @@ spec:
                 name: {{ .Release.Name }}-env
             - secretRef:
                 name: {{ .Values.existingSecret }}
+          {{- if .Values.wazuh.enabled }}
+          volumeMounts:
+            {{- include "prowler.wazuhAppVolumeMount" . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.wazuh.enabled }}
+        {{- include "prowler.wazuhSidecar" (dict "root" . "component" "ui") | nindent 8 }}
+      {{- end }}
+      {{- if .Values.wazuh.enabled }}
+      volumes:
+        {{- include "prowler.wazuhVolumes" (dict "root" . "component" "ui") | nindent 8 }}
+      {{- end }}

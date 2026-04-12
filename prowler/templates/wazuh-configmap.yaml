@@ -1,0 +1,27 @@
+{{- if .Values.wazuh.enabled }}
+{{- $components := list "api" "ui" "worker" "worker-beat" "mcp" "neo4j" "postgres" "valkey" }}
+{{- range $component := $components }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Release.Name }}-{{ $component }}-wazuh-agent-config
+data:
+  ossec.conf: |
+    <ossec_config>
+      <client>
+        <server>
+          <address>{{ $.Values.wazuh.manager }}</address>
+          <port>1514</port>
+          <protocol>tcp</protocol>
+        </server>
+        <config-profile>kubernetes,prowler-{{ $component }}</config-profile>
+      </client>
+
+      <localfile>
+        <log_format>syslog</log_format>
+        <location>/shared-logs/{{ $component }}.log</location>
+      </localfile>
+    </ossec_config>
+---
+{{- end }}
+{{- end }}

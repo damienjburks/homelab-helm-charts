@@ -13,6 +13,10 @@ spec:
         app: {{ .Release.Name }}-mcp
     spec:
       {{- include "prowler.nodeAffinity" . | nindent 6 }}
+      {{- if .Values.wazuh.enabled }}
+      initContainers:
+        {{- include "prowler.wazuhInitContainers" . | nindent 8 }}
+      {{- end }}
       containers:
         - name: mcp
           image: "{{ .Values.mcpServer.image }}:{{ .Values.mcpServer.tag }}"
@@ -34,3 +38,14 @@ spec:
               port: {{ .Values.mcpServer.port }}
             initialDelaySeconds: 15
             periodSeconds: 10
+          {{- if .Values.wazuh.enabled }}
+          volumeMounts:
+            {{- include "prowler.wazuhAppVolumeMount" . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.wazuh.enabled }}
+        {{- include "prowler.wazuhSidecar" (dict "root" . "component" "mcp") | nindent 8 }}
+      {{- end }}
+      {{- if .Values.wazuh.enabled }}
+      volumes:
+        {{- include "prowler.wazuhVolumes" (dict "root" . "component" "mcp") | nindent 8 }}
+      {{- end }}

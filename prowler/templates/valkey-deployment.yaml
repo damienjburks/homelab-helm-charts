@@ -13,6 +13,10 @@ spec:
         app: {{ .Release.Name }}-valkey
     spec:
       {{- include "prowler.nodeAffinity" . | nindent 6 }}
+      {{- if .Values.wazuh.enabled }}
+      initContainers:
+        {{- include "prowler.wazuhInitContainers" . | nindent 8 }}
+      {{- end }}
       containers:
         - name: valkey
           image: "{{ .Values.valkey.image }}:{{ .Values.valkey.tag }}"
@@ -28,7 +32,16 @@ spec:
             - name: data
               mountPath: /data
               subPath: prowler/valkey
+          {{- if .Values.wazuh.enabled }}
+            {{- include "prowler.wazuhAppVolumeMount" . | nindent 12 }}
+          {{- end }}
+      {{- if .Values.wazuh.enabled }}
+        {{- include "prowler.wazuhSidecar" (dict "root" . "component" "valkey") | nindent 8 }}
+      {{- end }}
       volumes:
         - name: data
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim | quote }}
+      {{- if .Values.wazuh.enabled }}
+        {{- include "prowler.wazuhVolumes" (dict "root" . "component" "valkey") | nindent 8 }}
+      {{- end }}
