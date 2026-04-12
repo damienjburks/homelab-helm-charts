@@ -14,7 +14,7 @@ data:
         <config-profile>kubernetes,uptime-kuma</config-profile>
         <enrollment>
           <agent_name>{{ $.Release.Name }}-{{ $component }}</agent_name>
-          <groups>{{ $.Values.wazuh.group | default "kubernetes" }}</groups>
+          <groups>{{ .Values.wazuh.group | default "kubernetes" }}</groups>
         </enrollment>
       </client>
 
