@@ -65,6 +65,8 @@ Usage: {{ include "prowler.wazuhSidecar" (dict "root" . "component" "api") | nin
 - name: wazuh-agent
   image: wazuh/wazuh-agent:4.14.4
   imagePullPolicy: IfNotPresent
+  securityContext:
+    runAsUser: 0
   env:
     - name: WAZUH_MANAGER
       value: {{ .root.Values.wazuh.manager | quote }}
