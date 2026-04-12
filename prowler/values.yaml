@@ -29,6 +29,7 @@ postgres:
   user: prowler
   password: postgres
   database: prowler_db
+  deleteOnSync: true
 
 valkey:
   image: valkey/valkey

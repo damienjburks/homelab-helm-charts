@@ -1,0 +1,28 @@
+{{- if .Values.postgres.deleteOnSync }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-postgres-presync
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      {{- include "prowler.nodeAffinity" . | nindent 6 }}
+      restartPolicy: Never
+      serviceAccountName: {{ .Values.postgres.presyncServiceAccount | default (printf "%s-presync" .Release.Name) }}
+      containers:
+        - name: delete-postgres
+          image: bitnami/kubectl:latest
+          command:
+            - sh
+            - -c
+            - |
+              echo "Deleting postgres deployment..."
+              kubectl delete deployment {{ .Release.Name }}-postgres --ignore-not-found=true
+              echo "Waiting for pods to terminate..."
+              kubectl wait --for=delete pod -l app={{ .Release.Name }}-postgres --timeout=120s 2>/dev/null || true
+              echo "Postgres deployment removed."
+{{- end }}
