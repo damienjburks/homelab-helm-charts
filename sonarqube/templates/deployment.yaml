@@ -48,6 +48,26 @@ spec:
               value: {{ .Values.postgresql.username | quote }}
             - name: SONAR_JDBC_PASSWORD
               value: {{ .Values.postgresql.password | quote }}
+            {{- if .Values.saml.enabled }}
+            - name: SONAR_AUTH_SAML_ENABLED
+              value: "true"
+            - name: SONAR_AUTH_SAML_APPLICATIONID
+              value: {{ .Values.saml.applicationId | quote }}
+            - name: SONAR_AUTH_SAML_PROVIDERNAME
+              value: {{ .Values.saml.providerName | quote }}
+            - name: SONAR_AUTH_SAML_PROVIDERID
+              value: {{ .Values.saml.providerId | quote }}
+            - name: SONAR_AUTH_SAML_LOGINURL
+              value: {{ .Values.saml.loginUrl | quote }}
+            - name: SONAR_AUTH_SAML_CERTIFICATE_SECURED
+              value: {{ .Values.saml.certificate | quote }}
+            - name: SONAR_AUTH_SAML_USER_LOGIN
+              value: {{ .Values.saml.user.login | quote }}
+            - name: SONAR_AUTH_SAML_USER_NAME
+              value: {{ .Values.saml.user.name | quote }}
+            - name: SONAR_AUTH_SAML_USER_EMAIL
+              value: {{ .Values.saml.user.email | quote }}
+            {{- end }}
           volumeMounts:
             - name: sonarqube-data
               mountPath: /opt/sonarqube/data
