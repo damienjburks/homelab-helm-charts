@@ -2,8 +2,8 @@ replicaCount: 1
 
 image:
   repository: sonarqube
-  tag: community
-  pullPolicy: Always
+  tag: "26.4.0.121862-community"
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
