@@ -10,6 +10,9 @@ service:
   port: 80
   targetPort: 9000
 
+sonarqube:
+  baseUrl: "https://sonar.burkscloud.xyz"
+
 ingress:
   enabled: true
   className: public

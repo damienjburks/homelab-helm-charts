@@ -44,6 +44,8 @@ spec:
           env:
             - name: SONAR_JDBC_URL
               value: "jdbc:postgresql://{{ .Release.Name }}-postgres:{{ .Values.postgresql.service.port }}/{{ .Values.postgresql.database }}"
+            - name: SONAR_CORE_SERVERBASEURL
+              value: {{ .Values.sonarqube.baseUrl | quote }}
             - name: SONAR_JDBC_USERNAME
               value: {{ .Values.postgresql.username | quote }}
             - name: SONAR_JDBC_PASSWORD
