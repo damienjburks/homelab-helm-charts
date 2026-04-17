@@ -43,47 +43,6 @@ postgresql:
   service:
     port: 5432
 
-saml:
-  enabled: true
-  applicationId: sonarqube
-  providerName: authentik
-  providerId: "https://authentik.burkscloud.xyz/"
-  loginUrl: "https://authentik.burkscloud.xyz/application/saml/sonarqube/sso/binding/redirect/"
-  certificate: |
-    MIIFUzCCAzugAwIBAgIRALfyaFuK3kO1obBn8AOCuwMwDQYJKoZIhvcNAQELBQAw
-    HTEbMBkGA1UEAwwSYXV0aGVudGlrIDIwMjYuMi4yMB4XDTI2MDQxNDAwMjgzOFoX
-    DTI3MDQxNTAwMjgzOFowVjEqMCgGA1UEAwwhYXV0aGVudGlrIFNlbGYtc2lnbmVk
-    IENlcnRpZmljYXRlMRIwEAYDVQQKDAlhdXRoZW50aWsxFDASBgNVBAsMC1NlbGYt
-    c2lnbmVkMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEArFF4YkIiLcPh
-    uX/cCx14y9lt8tHlQkEIHu9L47pVR1tUk9UaIJB4FbVYzy+ThmD5NWFgvmkEnJ5I
-    HBRqTChC2UxGFTuyGB0gX2wKCVfaPHIYXdAbibrsuGPdqQhIfv9D8SbYsAHFoBsr
-    VG+IjAAWKtxD2v4x/MjIgBp/AdwpOaXGPfIIWf+L7lBVucolj64KrV4RSF85/AB4
-    5m3PQNChhtIN56dDtTmKkU5WVlqVt2HX//gACjBM9RMeVdJ/kOiz8fZcP3ABxosP
-    jrmnhHgvd7WhcU83+tfB3DL5hOeXtpXFza8cOBcyz9EJkY2mRcbpkFXpAAbuRTuC
-    rUruuwOxePaWTEG5Sjl4ncx0CAOco6+FdfYWB9ohNyBzg120DvJaqLnN0xV2HhGh
-    3prDKbPR5YmrMMdij7IRCgQCRh78n0WcJ8UzaTB5Z0j0IiX3EgFcdNkbivRuSLWz
-    kNpk5p9DWXsNVfi3gMrZEjGnilOS1BoioWvxgXMOmzT+jxT+u3YUM1MxWvAbz3Bq
-    NSdnEOVXfu24zju9NaDl55hqnAx3qXWtYkye26sdcudQ0fCeAe+K79lWYF66q7WS
-    cUThf21zaYJgavMlgat8L4KnYjyX0kJVhtWNCh0gOM7eFwc4gd15v9uMG1fheO1d
-    4c6Gugb51TbjSFJo13DPAYcVvJplP5MCAwEAAaNVMFMwUQYDVR0RAQH/BEcwRYJD
-    dG9YWjhXdTF6cEo2ZDJKUUUwa2pVa0tmSUp6clBsN2txSnNMMFcwdS5zZWxmLXNp
-    Z25lZC5nb2F1dGhlbnRpay5pbzANBgkqhkiG9w0BAQsFAAOCAgEAoGp4wEAXRKWS
-    WkLV09bPXgnRqxmFVNPCWT0vvKPuSBh+O2RwBqnVZxy/8d3q4WRc71+ZYRvY/ZyM
-    ebJbHHH5YQUsYWVeThRUJbRohFYOU9zT19BtCKO9TtLDvOHIOWNje+aKASM6P9b3
-    Rlz+xh5JTfryQy+A5Am3jFv9Qkg1NOOWPuEFeWvT1zTzJ/3tlpxIJ3cLuk520iZw
-    zynuLzBeB/mLggLRIH9dJgQFkqHdWpf1yAqjdd0BoEaq9KGfAQyXOAxZ8S2+epEX
-    uVjX+LRDkqPIMdsmXmRbg98F1cKGYS6Oqts0T4PAqanJH9TRUmV3dZOxkXWFk67v
-    XZJ6fsBhnTnC2rZFP1geg0zrH5arivYmwfvioKJoLvBkOtJ4/RXUrH7vp+HnVIt7
-    zmdc5WoShxTBl7VQ2nhsiPNnUboBcNXQN3tTnbZkW4RqXQ35nkbTUCxUjhQkI7w4
-    tnpYektfcgqVX3VcP+LKEk7Uz9Pcld9z9PXY0QznV+Rj7isy3NOJ74qipecHCVBL
-    B3IPhIz0uKHBkgZQLtyAekeERrXG8/18GY2wtzZ5eIp+iZjrgpACpHnv2X1hr6Bh
-    wEyxJ8SuiYG8FOVl0fNweDf9nV8lq5zC2SseP437ACRAE2mLp/F2YkfnpfTnSnPg
-    AQ3b/5S00VMcif7qJu8BQutZl7WcYPI=
-  user:
-    login: "goauthentik.io/providers/saml/username"
-    name: "goauthentik.io/providers/saml/name"
-    email: "goauthentik.io/providers/saml/email"
-
 # Wazuh agent sidecar — disabled until an ARM64-compatible image is available.
 # The official wazuh/wazuh-agent image (4.14.x) requires ARMv8.2-a (Graviton 2+),
 # and older tags only ship linux/amd64. These nodes schedule across Pi 4 and Pi 5,
