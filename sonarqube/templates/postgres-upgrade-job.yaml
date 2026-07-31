@@ -25,6 +25,37 @@ spec:
         runAsGroup: 999
         fsGroup: 999
       initContainers:
+        # --- Step 0: Check if upgrade is actually needed ---
+        - name: check-version
+          image: busybox
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              TARGET_MAJOR="{{ $newTag | toString }}"
+              # Strip any minor/patch from target (e.g. "18.4" -> "18")
+              TARGET_MAJOR=$(echo "$TARGET_MAJOR" | cut -d. -f1)
+
+              VERSION_FILE="/pgdata/pgdata/PG_VERSION"
+              if [ -f "$VERSION_FILE" ]; then
+                CURRENT=$(cat "$VERSION_FILE" | tr -d '[:space:]')
+                echo "[upgrade] Current PG_VERSION on disk: $CURRENT, target: $TARGET_MAJOR"
+                if [ "$CURRENT" = "$TARGET_MAJOR" ]; then
+                  echo "[upgrade] Data directory already at PG $TARGET_MAJOR. No migration needed."
+                  # Write a sentinel so the main container can skip as well
+                  touch /pgdata/.upgrade-skip
+                  exit 0
+                fi
+              else
+                echo "[upgrade] No PG_VERSION file found — assuming fresh or old data dir."
+              fi
+              # Remove stale skip sentinel if present
+              rm -f /pgdata/.upgrade-skip
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgdata
+              subPath: sonarqube/postgres
+
         # --- Step 1: Fix permissions so postgres user (999) owns the data dir ---
         - name: fix-permissions
           image: busybox
@@ -34,6 +65,9 @@ spec:
           args:
             - |
               set -e
+              # Skip if already upgraded
+              [ -f /pgdata/.upgrade-skip ] && echo "[upgrade] Skipping (already at target version)." && exit 0
+
               echo "[upgrade] Ensuring correct ownership on data directories..."
               mkdir -p /pgdata/pgdata
               mkdir -p /pgdata/upgrade-new/pgdata
@@ -59,6 +93,9 @@ spec:
           args:
             - |
               set -euo pipefail
+              # Skip if already upgraded
+              [ -f /pgdata/.upgrade-skip ] && echo "[upgrade] Skipping dump (already at target version)." && exit 0
+
               echo "[upgrade] Starting old PG {{ $oldTag }} in single-user mode for dump..."
 
               # Start the old server on a custom port to avoid conflicts
@@ -91,14 +128,22 @@ spec:
               value: {{ .Values.postgresql.password | quote }}
             - name: PGDATA
               value: /pgdata/upgrade-new/pgdata
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "scram-sha-256"
           command: ["bash", "-c"]
           args:
             - |
               set -euo pipefail
+              # Skip if already upgraded
+              [ -f /pgdata/.upgrade-skip ] && echo "[upgrade] Skipping restore (already at target version)." && exit 0
+
               echo "[upgrade] Initializing new PG {{ $newTag }} data directory..."
 
               # Initialize the new cluster
-              initdb --username={{ .Values.postgresql.username | quote }} --pwfile=<(echo "$POSTGRES_PASSWORD")
+              initdb --username={{ .Values.postgresql.username | quote }} --pwfile=<(echo "$POSTGRES_PASSWORD") --auth-host=scram-sha-256 --auth-local=scram-sha-256
+
+              # Ensure pg_hba.conf allows network connections (pod-to-pod)
+              echo "host all all all scram-sha-256" >> "$PGDATA/pg_hba.conf"
 
               # Start the new server
               pg_ctl start -D "$PGDATA" -o "-p 5434 -k /tmp" -w -t 60
@@ -129,6 +174,13 @@ spec:
           args:
             - |
               set -e
+              # Skip if already upgraded
+              if [ -f /pgdata/.upgrade-skip ]; then
+                echo "[upgrade] Skipping swap (already at target version)."
+                rm -f /pgdata/.upgrade-skip
+                exit 0
+              fi
+
               echo "[upgrade] Swapping data directories..."
 
               cd /pgdata
