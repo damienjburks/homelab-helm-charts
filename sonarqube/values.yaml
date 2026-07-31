@@ -37,6 +37,9 @@ postgresql:
     repository: postgres
     tag: "18"
     pullPolicy: IfNotPresent
+  # Set previousTag when upgrading PG major versions to trigger the automated
+  # dump/restore migration job. Remove (or leave empty) once the upgrade completes.
+  previousTag: "15"
   database: sonarqube
   username: sonar
   password: sonar
