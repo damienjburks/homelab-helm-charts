@@ -35,7 +35,7 @@ persistence:
 postgresql:
   image:
     repository: postgres
-    tag: "15"
+    tag: "18"
     pullPolicy: IfNotPresent
   database: sonarqube
   username: sonar
