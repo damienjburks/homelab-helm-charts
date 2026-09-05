@@ -1,9 +1,13 @@
 replicaCount: 1
 
+# Use the per-architecture arm64v8 repo — the plain `sonarqube:community`
+# multi-arch manifest wasn't resolving to arm64 on these Pi nodes,
+# causing "exec format error". arm64v8/sonarqube is the official arm64 build.
+# Pinned to a specific version + digest for reproducibility.
 image:
-  repository: sonarqube
-  tag: community
-  pullPolicy: Always
+  repository: arm64v8/sonarqube
+  tag: 26.9.0.129388-community@sha256:8440a437d6e036a09a32a32e1f5ba7fe35d28ae6cb0e65f8a7dfa74f5f9bece8
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
