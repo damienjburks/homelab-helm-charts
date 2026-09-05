@@ -22,7 +22,37 @@ spec:
       {{- end }}
         - name: fix-permissions
           image: busybox
-          command: ["sh", "-c", "mkdir -p /var/lib/postgresql/data/pgdata && chown -R 999:999 /var/lib/postgresql/data/pgdata && chmod 0750 /var/lib/postgresql/data/pgdata"]
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              mkdir -p /var/lib/postgresql/data/pgdata
+              chown -R 999:999 /var/lib/postgresql/data/pgdata
+              chmod 0750 /var/lib/postgresql/data/pgdata
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+              subPath: sonarqube/postgres
+        - name: fix-pg-hba
+          image: busybox
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              HBA="/var/lib/postgresql/data/pgdata/pg_hba.conf"
+              if [ -f "$HBA" ]; then
+                # Ensure network access line exists
+                if ! grep -q "^host all all all" "$HBA"; then
+                  echo "host all all all scram-sha-256" >> "$HBA"
+                  echo "[pg-hba] Added network access rule to pg_hba.conf"
+                else
+                  echo "[pg-hba] Network access rule already present."
+                fi
+              else
+                echo "[pg-hba] No pg_hba.conf yet (fresh init will create one)."
+              fi
           securityContext:
             runAsUser: 0
           volumeMounts:
@@ -44,6 +74,8 @@ spec:
               value: {{ .Values.postgresql.password | quote }}
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "scram-sha-256"
           volumeMounts:
             - name: postgres-data
               mountPath: /var/lib/postgresql/data

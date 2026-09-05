@@ -1,0 +1,212 @@
+{{- if .Values.postgresql.previousTag }}
+{{- $oldTag := .Values.postgresql.previousTag | toString }}
+{{- $newTag := .Values.postgresql.image.tag | toString }}
+{{- if ne $oldTag $newTag }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-postgres-upgrade-{{ $oldTag }}-to-{{ $newTag }}
+  labels:
+    app: {{ .Release.Name }}-postgres-upgrade
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-postgres-upgrade
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+      initContainers:
+        # --- Step 0: Check if upgrade is actually needed ---
+        - name: check-version
+          image: busybox
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              TARGET_MAJOR="{{ $newTag | toString }}"
+              # Strip any minor/patch from target (e.g. "18.4" -> "18")
+              TARGET_MAJOR=$(echo "$TARGET_MAJOR" | cut -d. -f1)
+
+              VERSION_FILE="/pgdata/pgdata/PG_VERSION"
+              if [ -f "$VERSION_FILE" ]; then
+                CURRENT=$(cat "$VERSION_FILE" | tr -d '[:space:]')
+                echo "[upgrade] Current PG_VERSION on disk: $CURRENT, target: $TARGET_MAJOR"
+                if [ "$CURRENT" = "$TARGET_MAJOR" ]; then
+                  echo "[upgrade] Data directory already at PG $TARGET_MAJOR. No migration needed."
+                  # Write a sentinel so the main container can skip as well
+                  touch /pgdata/.upgrade-skip
+                  exit 0
+                fi
+              else
+                echo "[upgrade] No PG_VERSION file found — assuming fresh or old data dir."
+              fi
+              # Remove stale skip sentinel if present
+              rm -f /pgdata/.upgrade-skip
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgdata
+              subPath: sonarqube/postgres
+
+        # --- Step 1: Fix permissions so postgres user (999) owns the data dir ---
+        - name: fix-permissions
+          image: busybox
+          securityContext:
+            runAsUser: 0
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              # Skip if already upgraded
+              [ -f /pgdata/.upgrade-skip ] && echo "[upgrade] Skipping (already at target version)." && exit 0
+
+              echo "[upgrade] Ensuring correct ownership on data directories..."
+              mkdir -p /pgdata/pgdata
+              mkdir -p /pgdata/upgrade-new/pgdata
+              chown -R 999:999 /pgdata
+              chmod 0750 /pgdata/pgdata
+              chmod 0750 /pgdata/upgrade-new/pgdata
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgdata
+              subPath: sonarqube/postgres
+
+        # --- Step 2: Dump all databases from old PG version ---
+        - name: dump-old
+          image: "{{ .Values.postgresql.image.repository }}:{{ $oldTag }}"
+          securityContext:
+            runAsUser: 999
+          env:
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgresql.password | quote }}
+            - name: PGDATA
+              value: /pgdata/pgdata
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              # Skip if already upgraded
+              [ -f /pgdata/.upgrade-skip ] && echo "[upgrade] Skipping dump (already at target version)." && exit 0
+
+              echo "[upgrade] Starting old PG {{ $oldTag }} in single-user mode for dump..."
+
+              # Start the old server on a custom port to avoid conflicts
+              pg_ctl start -D "$PGDATA" -o "-p 5433 -k /tmp" -w -t 60
+
+              echo "[upgrade] Running pg_dumpall..."
+              pg_dumpall -h /tmp -p 5433 -U {{ .Values.postgresql.username | quote }} \
+                > /pgdata/upgrade-dump.sql
+
+              echo "[upgrade] Dump complete ($(wc -c < /pgdata/upgrade-dump.sql) bytes)."
+              pg_ctl stop -D "$PGDATA" -m fast -w -t 60
+
+              echo "[upgrade] Old server stopped."
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgdata
+              subPath: sonarqube/postgres
+
+        # --- Step 3: Init a fresh data directory with new PG version and restore ---
+        - name: restore-new
+          image: "{{ .Values.postgresql.image.repository }}:{{ $newTag }}"
+          securityContext:
+            runAsUser: 999
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.postgresql.database | quote }}
+            - name: POSTGRES_USER
+              value: {{ .Values.postgresql.username | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.postgresql.password | quote }}
+            - name: PGDATA
+              value: /pgdata/upgrade-new/pgdata
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: "scram-sha-256"
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              # Skip if already upgraded
+              [ -f /pgdata/.upgrade-skip ] && echo "[upgrade] Skipping restore (already at target version)." && exit 0
+
+              echo "[upgrade] Initializing new PG {{ $newTag }} data directory..."
+
+              # Initialize the new cluster
+              initdb --username={{ .Values.postgresql.username | quote }} --pwfile=<(echo "$POSTGRES_PASSWORD") --auth-host=scram-sha-256 --auth-local=scram-sha-256
+
+              # Ensure pg_hba.conf allows network connections (pod-to-pod)
+              echo "host all all all scram-sha-256" >> "$PGDATA/pg_hba.conf"
+
+              # Start the new server
+              pg_ctl start -D "$PGDATA" -o "-p 5434 -k /tmp" -w -t 60
+
+              # Create the target database if it doesn't exist in the dump
+              psql -h /tmp -p 5434 -U {{ .Values.postgresql.username | quote }} -tc \
+                "SELECT 1 FROM pg_database WHERE datname='{{ .Values.postgresql.database }}'" | grep -q 1 || \
+                createdb -h /tmp -p 5434 -U {{ .Values.postgresql.username | quote }} {{ .Values.postgresql.database | quote }}
+
+              echo "[upgrade] Restoring dump into new cluster..."
+              psql -h /tmp -p 5434 -U {{ .Values.postgresql.username | quote }} -f /pgdata/upgrade-dump.sql \
+                --set ON_ERROR_STOP=off || true
+
+              echo "[upgrade] Restore complete. Stopping new server."
+              pg_ctl stop -D "$PGDATA" -m fast -w -t 60
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgdata
+              subPath: sonarqube/postgres
+
+      containers:
+        # --- Step 4: Swap directories — old becomes backup, new becomes active ---
+        - name: swap-data
+          image: busybox
+          securityContext:
+            runAsUser: 0
+          command: ["sh", "-c"]
+          args:
+            - |
+              set -e
+              # Skip if already upgraded
+              if [ -f /pgdata/.upgrade-skip ]; then
+                echo "[upgrade] Skipping swap (already at target version)."
+                rm -f /pgdata/.upgrade-skip
+                exit 0
+              fi
+
+              echo "[upgrade] Swapping data directories..."
+
+              cd /pgdata
+
+              # Back up old data dir
+              if [ -d pgdata ]; then
+                mv pgdata "pgdata-pre-upgrade-{{ $oldTag }}"
+                echo "[upgrade] Old data backed up to pgdata-pre-upgrade-{{ $oldTag }}"
+              fi
+
+              # Move new data dir into place
+              mv upgrade-new/pgdata pgdata
+              rmdir upgrade-new 2>/dev/null || true
+
+              # Clean up dump file
+              rm -f upgrade-dump.sql
+
+              echo "[upgrade] Data directory swap complete. PG {{ $newTag }} is ready."
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /pgdata
+              subPath: sonarqube/postgres
+
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.postgres.existingClaim | quote }}
+{{- end }}
+{{- end }}
