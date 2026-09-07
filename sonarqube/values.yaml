@@ -4,8 +4,8 @@ replicaCount: 1
 # tag is a multi-arch manifest that includes an arm64 build, so pinning the
 # index digest lets the runtime pull the correct arm64 layer on these Pi nodes.
 image:
-  repository: sonarqube
-  tag: community@sha256:62930c7f510534bb2bf551ca69ad3ee6f8e12b4116d394597c64cefccbb3313b
+  repository: arm64v8/sonarqube
+  tag: 26.8.0.126808-community
   pullPolicy: Always
 
 service:
